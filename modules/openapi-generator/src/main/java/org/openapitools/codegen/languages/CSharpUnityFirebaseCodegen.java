@@ -128,10 +128,10 @@ public class CSharpUnityFirebaseCodegen extends AbstractCSharpCodegen {
         typeMapping.put("double", "double");
         typeMapping.put("number", "decimal");
         typeMapping.put("decimal", "decimal");
-        typeMapping.put("DateTime", "DateTime");
-        typeMapping.put("date", "DateTime");
+        typeMapping.put("DateTime", "DateTimeOffset");
+        typeMapping.put("date", "DateTimeOffset");
         typeMapping.put("UUID", "Guid");
-        typeMapping.put("URI", "string");
+        typeMapping.put("URI", "Uri");
 
         setSupportNullable(Boolean.TRUE);
 
