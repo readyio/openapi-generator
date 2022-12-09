@@ -62,7 +62,8 @@
 		"java.dependency.refreshDelay": 3000,
 		"java.format.enabled": true,
 
-		"maven.pomfile.autoUpdateEffectivePOM": true,
+        "maven.pomfile.autoUpdateEffectivePOM": true,
+        "java.compile.nullAnalysis.mode": "automatic",
 	},
 	"extensions": {
 		"recommendations": [

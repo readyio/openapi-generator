@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text;
+using {{packageName}}.{{modelPackage}};
 
 namespace {{packageName}}.Client
 {
@@ -57,7 +58,7 @@ namespace {{packageName}}.Client
             }
             catch (Exception e)
             {
-                throw new ApiException(e.Message, e.StatusCode, e.ResponseData);
+                throw new ApiException(e.Message);
             }
         }
         {{/operation}}
@@ -243,31 +244,6 @@ namespace {{packageName}}.Client
         }
         {{/supportsUWP}}
         {{/netStandard}}
-
-        /// <summary>
-        /// Convert params to key/value pairs.
-        /// Use collectionFormat to properly format lists and collections.
-        /// </summary>
-        /// <param name="collectionFormat">Collection format.</param>
-        /// <param name="name">Key name.</param>
-        /// <param name="value">Value object.</param>
-        /// <returns>A list of KeyValuePairs</returns>
-        public IEnumerable<KeyValuePair<string, string>> ParameterToKeyValuePairs(string collectionFormat, string name, object value)
-        {
-            var parameters = new List<KeyValuePair<string, string>>();
-
-            if (IsCollection(value) && collectionFormat == "multi")
-            {
-                var valueCollection = value as IEnumerable;
-                parameters.AddRange(from object item in valueCollection select new KeyValuePair<string, string>(name, ParameterToString(item)));
-            }
-            else
-            {
-                parameters.Add(new KeyValuePair<string, string>(name, ParameterToString(value)));
-            }
-
-            return parameters;
-        }
 
         /// <summary>
         /// Check if generic object is a collection.

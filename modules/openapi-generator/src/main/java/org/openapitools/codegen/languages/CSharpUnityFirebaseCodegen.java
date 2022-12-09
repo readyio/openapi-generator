@@ -112,7 +112,7 @@ public class CSharpUnityFirebaseCodegen extends AbstractCSharpCodegen {
 
         supportsInheritance = true;
         modelTemplateFiles.put("model.mustache", ".cs");
-        apiTemplateFiles.put("api.mustache", ".cs");
+        apiTemplateFiles.put("ApiClient.mustache", ".cs");
 
         modelDocTemplateFiles.put("model_doc.mustache", ".md");
         apiDocTemplateFiles.put("api_doc.mustache", ".md");
@@ -431,8 +431,8 @@ public class CSharpUnityFirebaseCodegen extends AbstractCSharpCodegen {
                 clientPackageDir, "IApiAccessor.cs"));
         supportingFiles.add(new SupportingFile("Configuration.mustache",
                 clientPackageDir, "Configuration.cs"));
-        supportingFiles.add(new SupportingFile("ApiClient.mustache",
-                clientPackageDir, "ApiClient.cs"));
+        // supportingFiles.add(new SupportingFile("ApiClient.mustache",
+        //         clientPackageDir, "ApiClient.cs"));
         supportingFiles.add(new SupportingFile("ApiException.mustache",
                 clientPackageDir, "ApiException.cs"));
         supportingFiles.add(new SupportingFile("ApiResponse.mustache",
