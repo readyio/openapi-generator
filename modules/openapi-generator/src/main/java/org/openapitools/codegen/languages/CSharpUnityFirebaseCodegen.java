@@ -463,7 +463,7 @@ public class CSharpUnityFirebaseCodegen extends AbstractCSharpCodegen {
 
     @Override
     public String getHelp() {
-        return "Generates a C# client library (.NET Standard, .NET Core).";
+        return "Generates a C# client library for Unity using Firebase Callable Functions";
     }
 
     public String getModelPropertyNaming() {

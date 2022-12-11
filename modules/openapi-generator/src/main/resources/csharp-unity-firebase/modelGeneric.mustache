@@ -92,10 +92,11 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         {{#vars}}
         {{^isInherited}}
         {{^isEnum}}
+        {{#description}}
         /// <summary>
-        /// {{description}}{{^description}}Gets or Sets {{{name}}}{{/description}}
-        /// </summary>{{#description}}
-        /// <value>{{.}}</value>{{/description}}
+        /// {{.}}
+        /// </summary>
+        {{/description}}
         {{#deprecated}}
         [Obsolete]
         {{/deprecated}}
@@ -113,22 +114,13 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             var sb = new StringBuilder();
             sb.Append("class {{classname}} {\n");
             {{#parent}}
-            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).Append("\n");
+            sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).AppendLine();
             {{/parent}}
             {{#vars}}
-            sb.Append("  {{name}}: ").Append({{name}}).Append("\n");
+            sb.Append("  {{name}}: ").Append({{name}}).AppendLine();
             {{/vars}}
             sb.Append("}\n");
             return sb.ToString();
-        }
-
-        /// <summary>
-        /// Returns the JSON string presentation of the object
-        /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
-        public {{#parent}}{{^isArray}}{{^isMap}}override {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}virtual {{/parent}}string ToJson(RGN.Dependencies.Serialization.IJson json)
-        {
-            return json.ToJson(this);
         }
 
         /// <summary>
@@ -138,7 +130,7 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         /// <returns>Boolean</returns>
         public override bool Equals(object input)
         {
-            return this.Equals(input as {{classname}});
+            return Equals(input as {{classname}});
         }
 
         /// <summary>
@@ -153,15 +145,15 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
 
             return {{#vars}}{{#parent}}base.Equals(input) && {{/parent}}{{^isContainer}}
                 (
-                    this.{{name}} == input.{{name}} ||
-                    (this.{{name}} != null &&
-                    this.{{name}}.Equals(input.{{name}}))
+                    {{name}} == input.{{name}} ||
+                    ({{name}} != null &&
+                    {{name}}.Equals(input.{{name}}))
                 ){{^-last}} && {{/-last}}{{/isContainer}}{{#isContainer}}
                 (
-                    this.{{name}} == input.{{name}} ||
-                    this.{{name}} != null &&
+                    {{name}} == input.{{name}} ||
+                    {{name}} != null &&
                     input.{{name}} != null &&
-                    this.{{name}}.SequenceEqual(input.{{name}})
+                    {{name}}.SequenceEqual(input.{{name}})
                 ){{^-last}} && {{/-last}}{{/isContainer}}{{/vars}}{{^vars}}{{#parent}}base.Equals(input){{/parent}}{{^parent}}false{{/parent}}{{/vars}};
         }
 
@@ -180,10 +172,27 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
                 int hashCode = 41;
                 {{/parent}}
                 {{#vars}}
-                if (this.{{name}} != null)
-                    hashCode = hashCode * 59 + this.{{name}}.GetHashCode();
+                if ({{name}} != null)
+                    hashCode = hashCode * 59 + {{name}}.GetHashCode();
                 {{/vars}}
                 return hashCode;
             }
+        }
+
+        /// <summary>
+        /// Returns the JSON string presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public {{#parent}}{{^isArray}}{{^isMap}}override {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}virtual {{/parent}}string ToJson(RGN.Dependencies.Serialization.IJson json)
+        {
+            return json.ToJson(this);
+        }
+        /// <summary>
+        /// Returns the {{classname}} intance from json string
+        /// </summary>
+        /// <returns>{{classname}} intance from json string</returns>
+        public static {{classname}} FromJson(RGN.Dependencies.Serialization.IJson json, string jsonStr)
+        {
+            return json.FromJson<{{classname}}>(jsonStr);
         }
     }

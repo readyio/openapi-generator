@@ -9,10 +9,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text;
+using RGN.FunctionsClient;
 using RGN.Dependencies.Core.Functions;
-using {{packageName}}.{{modelPackage}};
+using RGN.Modules.{{packageName}}.FunctionsClient.{{modelPackage}};
 
-namespace {{packageName}}.Client
+namespace RGN.Modules.{{packageName}}.FunctionsClient
 {
     /// <summary>
     /// API client is mainly responsible for making the HTTP call to the API backend.
@@ -23,7 +24,7 @@ namespace {{packageName}}.Client
 
         {{#operations}}
         {{#operation}}
-        private readonly IHttpsCallableReference {{operationId}}Function;
+        private readonly IHttpsCallableReference m{{operationId}}Function;
         {{/operation}}
         {{/operations}}
 
@@ -36,7 +37,7 @@ namespace {{packageName}}.Client
             mRgnCore = rgnCore;
         {{#operations}}
         {{#operation}}
-            {{operationId}}Function = mRgnCore.readyMasterFunction.GetHttpsCallable("{{packageName}}-{{operationId}}");
+            m{{operationId}}Function = mRgnCore.readyMasterFunction.GetHttpsCallable("{{#lambda.camelcase_param}}{{packageName}}{{/lambda.camelcase_param}}-{{#lambda.camelcase_param}}{{operationId}}{{/lambda.camelcase_param}}");
         {{/operation}}
         {{/operations}}
         }
@@ -59,13 +60,16 @@ namespace {{packageName}}.Client
         public async {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{{dataType}}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
         {
             var parameters = new Dictionary<string, object>() {
-                {{#allParams}}{ "{{paramName}}", {{paramName}} }{{^-last}},{{/-last}}{{/allParams}}
+                {{#allParams}}{ "{{paramName}}", {{paramName}} }{{^-last}},
+                {{/-last}}{{/allParams}}
             };
             try
             {
-                var result = await {{operationId}}Function.CallAsync(parameters);
+                var result = await m{{operationId}}Function.CallAsync(parameters);
                 cancellationToken.ThrowIfCancellationRequested();
-                return {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}(object){{/returnType}}result.Data;
+                var dictResult = (IDictionary<object, object>)result.Data;
+                var strResult = (string)dictResult["result"];
+                return {{#returnType}}{{{returnType}}}{{/returnType}}.FromJson(mRgnCore.Dependencies.Json, strResult);
             }
             catch (Exception e)
             {
