@@ -9,6 +9,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using System.Text;
+using RGN.Dependencies.Core.Functions;
 using {{packageName}}.{{modelPackage}};
 
 namespace {{packageName}}.Client
@@ -18,15 +19,26 @@ namespace {{packageName}}.Client
     /// </summary>
     {{>visibility}} partial class ApiClient
     {
-        private readonly RGN.IRGNRolesCore mRgnCore;
+        private readonly IRGNRolesCore mRgnCore;
+
+        {{#operations}}
+        {{#operation}}
+        private readonly IHttpsCallableReference {{operationId}}Function;
+        {{/operation}}
+        {{/operations}}
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ApiClient" /> class
         /// </summary>
         /// <param name="rgnCore">An instance of RGNCore.</param>
-        public ApiClient(RGN.IRGNRolesCore rgnCore)
+        public ApiClient(IRGNRolesCore rgnCore)
         {
             mRgnCore = rgnCore;
+        {{#operations}}
+        {{#operation}}
+            {{operationId}}Function = mRgnCore.readyMasterFunction.GetHttpsCallable("{{packageName}}-{{operationId}}");
+        {{/operation}}
+        {{/operations}}
         }
 
         {{#operations}}
@@ -44,15 +56,14 @@ namespace {{packageName}}.Client
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public async {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async ({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{{dataType}}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
+        public async {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{{dataType}}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
         {
-            var function = mRgnCore.readyMasterFunction.GetHttpsCallable("{{packageName}}-{{operationId}}");
-            var parameters = new Dictionary<string, object>(){ {{#allParams}}
-                { "{{baseName}}", {{paramName}} }{{^-last}},{{/-last}}
-            {{/allParams}} };
+            var parameters = new Dictionary<string, object>() {
+                {{#allParams}}{ "{{paramName}}", {{paramName}} }{{^-last}},{{/-last}}{{/allParams}}
+            };
             try
             {
-                var result = await function.CallAsync(parameters);
+                var result = await {{operationId}}Function.CallAsync(parameters);
                 cancellationToken.ThrowIfCancellationRequested();
                 return {{#returnType}}{{{returnType}}}{{/returnType}}{{^returnType}}(object){{/returnType}}result.Data;
             }
@@ -63,196 +74,5 @@ namespace {{packageName}}.Client
         }
         {{/operation}}
         {{/operations}}
-
-        /// <summary>
-        /// Escape string (url-encoded).
-        /// </summary>
-        /// <param name="str">String to be escaped.</param>
-        /// <returns>Escaped string.</returns>
-        public string EscapeString(string str)
-        {
-            return UrlEncode(str);
-        }
-
-        /// <summary>
-        ///Check if the given MIME is a JSON MIME.
-        ///JSON MIME examples:
-        ///    application/json
-        ///    application/json; charset=UTF8
-        ///    APPLICATION/JSON
-        ///    application/vnd.company+json
-        /// </summary>
-        /// <param name="mime">MIME</param>
-        /// <returns>Returns True if MIME type is json.</returns>
-        public bool IsJsonMime(String mime)
-        {
-            var jsonRegex = new Regex("(?i)^(application/json|[^;/ \t]+/[^;/ \t]+[+]json)[ \t]*(;.*)?$");
-            return mime != null && (jsonRegex.IsMatch(mime) || mime.Equals("application/json-patch+json"));
-        }
-
-        /// <summary>
-        /// Select the Content-Type header's value from the given content-type array:
-        /// if JSON type exists in the given array, use it;
-        /// otherwise use the first one defined in 'consumes'
-        /// </summary>
-        /// <param name="contentTypes">The Content-Type array to select from.</param>
-        /// <returns>The Content-Type header to use.</returns>
-        public String SelectHeaderContentType(String[] contentTypes)
-        {
-            if (contentTypes.Length == 0)
-                return "application/json";
-
-            foreach (var contentType in contentTypes)
-            {
-                if (IsJsonMime(contentType.ToLower()))
-                    return contentType;
-            }
-
-            return contentTypes[0]; // use the first content type specified in 'consumes'
-        }
-
-        /// <summary>
-        /// Select the Accept header's value from the given accepts array:
-        /// if JSON exists in the given array, use it;
-        /// otherwise use all of them (joining into a string)
-        /// </summary>
-        /// <param name="accepts">The accepts array to select from.</param>
-        /// <returns>The Accept header to use.</returns>
-        public String SelectHeaderAccept(String[] accepts)
-        {
-            if (accepts.Length == 0)
-                return null;
-
-            if (accepts.Contains("application/json", StringComparer.OrdinalIgnoreCase))
-                return "application/json";
-
-            return String.Join(",", accepts);
-        }
-
-        /// <summary>
-        /// Encode string in base64 format.
-        /// </summary>
-        /// <param name="text">String to be encoded.</param>
-        /// <returns>Encoded string.</returns>
-        public static string Base64Encode(string text)
-        {
-            return System.Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(text));
-        }
-
-        /// <summary>
-        /// Dynamically cast the object into target type.
-        /// </summary>
-        /// <param name="fromObject">Object to be casted</param>
-        /// <param name="toObject">Target type</param>
-        /// <returns>Casted object</returns>
-        {{#supportsAsync}}
-        public static dynamic ConvertType(dynamic fromObject, Type toObject)
-        {{/supportsAsync}}
-        {{^supportsAsync}}
-        public static object ConvertType<T>(T fromObject, Type toObject) where T : class
-        {{/supportsAsync}}
-        {
-            return Convert.ChangeType(fromObject, toObject);
-        }
-
-        /// <summary>
-        /// Convert stream to byte array
-        /// </summary>
-        /// <param name="inputStream">Input stream to be converted</param>
-        /// <returns>Byte array</returns>
-        public static byte[] ReadAsBytes(Stream inputStream)
-        {
-            byte[] buf = new byte[16*1024];
-            using (MemoryStream ms = new MemoryStream())
-            {
-                int count;
-                while ((count = inputStream.Read(buf, 0, buf.Length)) > 0)
-                {
-                    ms.Write(buf, 0, count);
-                }
-                return ms.ToArray();
-            }
-        }
-
-        /// <summary>
-        /// URL encode a string
-        /// Credit/Ref: https://github.com/restsharp/RestSharp/blob/master/RestSharp/Extensions/StringExtensions.cs#L50
-        /// </summary>
-        /// <param name="input">String to be URL encoded</param>
-        /// <returns>Byte array</returns>
-        public static string UrlEncode(string input)
-        {
-            const int maxLength = 32766;
-
-            if (input == null)
-            {
-                throw new ArgumentNullException("input");
-            }
-
-            if (input.Length <= maxLength)
-            {
-                return Uri.EscapeDataString(input);
-            }
-
-            StringBuilder sb = new StringBuilder(input.Length * 2);
-            int index = 0;
-
-            while (index < input.Length)
-            {
-                int length = Math.Min(input.Length - index, maxLength);
-                string subString = input.Substring(index, length);
-
-                sb.Append(Uri.EscapeDataString(subString));
-                index += subString.Length;
-            }
-
-            return sb.ToString();
-        }
-
-        /// <summary>
-        /// Sanitize filename by removing the path
-        /// </summary>
-        /// <param name="filename">Filename</param>
-        /// <returns>Filename</returns>
-        public static string SanitizeFilename(string filename)
-        {
-            Match match = Regex.Match(filename, @".*[/\\](.*)$");
-
-            if (match.Success)
-            {
-                return match.Groups[1].Value;
-            }
-            else
-            {
-                return filename;
-            }
-        }
-        {{^netStandard}}
-        {{#supportsUWP}}
-        /// <summary>
-        /// Convert stream to byte array
-        /// </summary>
-        /// <param name="stream">IO stream</param>
-        /// <returns>Byte array</returns>
-        public static byte[] ToByteArray(Stream stream)
-        {
-            stream.Position = 0;
-            byte[] buffer = new byte[stream.Length];
-            for (int totalBytesCopied = 0; totalBytesCopied < stream.Length;)
-                totalBytesCopied += stream.Read(buffer, totalBytesCopied, Convert.ToInt32(stream.Length) - totalBytesCopied);
-            return buffer;
-        }
-        {{/supportsUWP}}
-        {{/netStandard}}
-
-        /// <summary>
-        /// Check if generic object is a collection.
-        /// </summary>
-        /// <param name="value"></param>
-        /// <returns>True if object is a collection type</returns>
-        private static bool IsCollection(object value)
-        {
-            return value is IList || value is ICollection;
-        }
     }
 }
