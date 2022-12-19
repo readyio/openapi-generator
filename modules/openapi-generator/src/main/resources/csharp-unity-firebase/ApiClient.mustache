@@ -57,7 +57,7 @@ namespace RGN.Modules.{{packageName}}.FunctionsClient
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public async {{#returnType}}Task<{{{.}}}>{{/returnType}}{{^returnType}}Task<string>{{/returnType}} {{operationId}}Async({{#allParams}}{{{dataType}}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{{dataType}}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
+        public async {{#returnType}}Task<{{{.}}}{{modelPackage}}>{{/returnType}}{{^returnType}}Task<string>{{/returnType}} {{operationId}}Async({{#allParams}}{{dataType}}{{modelPackage}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{dataType}}{{modelPackage}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
         {
             var parameters = new Dictionary<string, object>() {
                 {{#allParams}}{ "{{paramName}}", {{paramName}} }{{^-last}},
@@ -69,7 +69,7 @@ namespace RGN.Modules.{{packageName}}.FunctionsClient
                 cancellationToken.ThrowIfCancellationRequested();
                 var dictResult = (IDictionary<object, object>)result.Data;
                 var strResult = (string)dictResult["result"];
-                return {{#returnType}}{{returnType}}.FromJson(mRgnCore.Dependencies.Json, strResult){{/returnType}}{{^returnType}}strResult{{/returnType}};
+                return {{#returnType}}{{returnType}}{{modelPackage}}.FromJson(mRgnCore.Dependencies.Json, strResult){{/returnType}}{{^returnType}}strResult{{/returnType}};
             }
             catch (Exception e)
             {

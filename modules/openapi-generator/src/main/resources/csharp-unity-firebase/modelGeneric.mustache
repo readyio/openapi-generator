@@ -2,7 +2,7 @@
     /// {{description}}{{^description}}{{classname}}{{/description}}
     /// </summary>
     [Serializable]
-    {{>visibility}} class {{classname}} : {{#parent}}{{{.}}}, {{/parent}} IEquatable<{{classname}}>
+    {{>visibility}} class {{classname}}{{modelPackage}} : {{#parent}}{{{.}}}{{modelPackage}}, {{/parent}} IEquatable<{{classname}}{{modelPackage}}>
     {
         {{#vars}}
         {{#items.isEnum}}
@@ -31,13 +31,13 @@
         {{/isEnum}}
         {{/vars}}
         // To support static factory
-        private {{classname}}() { }
+        private {{classname}}{{modelPackage}}() { }
     {{#hasRequired}}
     {{^hasOnlyReadOnly}}
         /// <summary>
         /// Initializes a new instance of the <see cref="{{classname}}" /> class.
         /// </summary>
-        protected {{classname}}() { }
+        protected {{classname}}{{modelPackage}}() { }
     {{/hasOnlyReadOnly}}
     {{/hasRequired}}
         /// <summary>
@@ -48,7 +48,7 @@
         /// <param name="{{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}}">{{description}}{{^description}}{{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}}{{/description}}{{#required}} (required){{/required}}{{#defaultValue}} (default to {{.}}){{/defaultValue}}.</param>
         {{/isReadOnly}}
         {{/vars}}
-        public {{classname}}(
+        public {{classname}}{{modelPackage}}(
             {{#readWriteVars}}{{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}} {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}} = {{{defaultValue}}}{{^defaultValue}}default({{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}}){{/defaultValue}}{{^-last}},
             {{/-last}}{{/readWriteVars}}){{#parent}}
             : base({{#parentVars}}{{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}}{{^-last}}, {{/-last}}{{/parentVars}}){{/parent}}
@@ -114,7 +114,7 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         public override string ToString()
         {
             var sb = new StringBuilder();
-            sb.Append("class {{classname}} {\n");
+            sb.Append("class {{classname}}{{modelPackage}} {\n");
             {{#parent}}
             sb.Append("  ").Append(base.ToString().Replace("\n", "\n  ")).AppendLine();
             {{/parent}}
@@ -136,11 +136,11 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         }
 
         /// <summary>
-        /// Returns true if {{classname}} instances are equal
+        /// Returns true if {{classname}}{{modelPackage}} instances are equal
         /// </summary>
-        /// <param name="input">Instance of {{classname}} to be compared</param>
+        /// <param name="input">Instance of {{classname}}{{modelPackage}} to be compared</param>
         /// <returns>Boolean</returns>
-        public bool Equals({{classname}} input)
+        public bool Equals({{classname}}{{modelPackage}} input)
         {
             if (input == null)
                 return false;
@@ -190,12 +190,12 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             return json.ToJson(this);
         }
         /// <summary>
-        /// Returns the {{classname}} intance from json string
+        /// Returns the {{classname}}{{modelPackage}} intance from json string
         /// </summary>
-        /// <returns>{{classname}} intance from json string</returns>
-        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}} FromJson(RGN.Dependencies.Serialization.IJson json, string jsonStr)
+        /// <returns>{{classname}}{{modelPackage}} intance from json string</returns>
+        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}}{{modelPackage}} FromJson(RGN.Dependencies.Serialization.IJson json, string jsonStr)
         {
-            return json.FromJson<{{classname}}>(jsonStr);
+            return json.FromJson<{{classname}}{{modelPackage}}>(jsonStr);
         }
 
         /// <summary>
@@ -217,17 +217,17 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             return dict;
         }
         /// <summary>
-        /// Returns the {{classname}} intance from dictionary representation. If the dictionary does not have the value, it is ignored
+        /// Returns the {{classname}}{{modelPackage}} intance from dictionary representation. If the dictionary does not have the value, it is ignored
         /// </summary>
-        /// <returns>{{classname}} intance from dictionary representation</returns>
-        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}} FromDictionary(Dictionary<string, object> dictionary)
+        /// <returns>{{classname}}{{modelPackage}} intance from dictionary representation</returns>
+        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}}{{modelPackage}} FromDictionary(Dictionary<string, object> dictionary)
         {
             ThrowIf.Collection.IsNullOrEmpty(dictionary, nameof(dictionary));
             {{#parent}}
-            var toReturn = ({{classname}}){{{.}}}.FromDictionary(dictionary);
+            var toReturn = ({{classname}}{{modelPackage}}){{{.}}}{{modelPackage}}.FromDictionary(dictionary);
             {{/parent}}
             {{^parent}}
-            var toReturn = new {{classname}}();
+            var toReturn = new {{classname}}{{modelPackage}}();
             {{/parent}}
             {{#vars}}
             if (dictionary.TryGetValue("{{name}}", out object {{name}}))
