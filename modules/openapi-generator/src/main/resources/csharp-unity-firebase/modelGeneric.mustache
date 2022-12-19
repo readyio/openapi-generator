@@ -30,6 +30,8 @@
         public {{{complexType}}}{{^complexType}}{{{datatypeWithEnum}}}{{/complexType}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}} {{name}};
         {{/isEnum}}
         {{/vars}}
+        // To support static factory
+        private {{classname}}() { }
     {{#hasRequired}}
     {{^hasOnlyReadOnly}}
         /// <summary>
@@ -194,5 +196,38 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         public static {{classname}} FromJson(RGN.Dependencies.Serialization.IJson json, string jsonStr)
         {
             return json.FromJson<{{classname}}>(jsonStr);
+        }
+
+        /// <summary>
+        /// Returns Dictionary presentation of the object
+        /// </summary>
+        /// <returns>JSON string presentation of the object</returns>
+        public {{#parent}}{{^isArray}}{{^isMap}}override {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}virtual {{/parent}}Dictionary<string, object> ToDictionary()
+        {
+            {{#parent}}
+            var dict = base.ToDictionary();
+            {{/parent}}
+            {{^parent}}
+            var dict = new Dictionary<string, object>();
+            {{/parent}}
+            {{#vars}}
+            if ({{name}} != null)
+                dict.Add("{{name}}", {{name}});
+            {{/vars}}
+            return dict;
+        }
+        /// <summary>
+        /// Returns the {{classname}} intance from dictionary representation
+        /// </summary>
+        /// <returns>{{classname}} intance from dictionary representation</returns>
+        public static {{classname}} FromDictionary(Dictionary<string, object> dictionary)
+        {
+            ThrowIf.Collection.IsNullOrEmpty(dictionary, nameof(dictionary));
+            var toReturn = new {{classname}}();
+            {{#vars}}
+            if (dictionary.TryGetValue("{{name}}", out object {{name}}))
+                toReturn.{{name}} = ({{{dataType}}}){{name}};
+            {{/vars}}
+            return toReturn;
         }
     }
