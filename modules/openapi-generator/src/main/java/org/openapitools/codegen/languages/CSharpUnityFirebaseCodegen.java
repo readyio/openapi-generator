@@ -910,7 +910,7 @@ public class CSharpUnityFirebaseCodegen extends AbstractCSharpCodegen {
         }
 
         supportingFiles.add(new SupportingFile("appveyor.mustache", "", "appveyor.yml"));
-        supportingFiles.add(new SupportingFile("AbstractOpenAPISchema.mustache", modelPackageDir, "AbstractOpenAPISchema.cs"));
+        //supportingFiles.add(new SupportingFile("AbstractOpenAPISchema.mustache", modelPackageDir, "AbstractOpenAPISchema.cs"));
     }
 
     public void addGenericHostSupportingFiles(final String clientPackageDir, final String packageFolder,
