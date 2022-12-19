@@ -235,4 +235,40 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             {{/vars}}
             return toReturn;
         }
+
+        /// <summary>
+        /// Creates a model instance from this DTO
+        /// </summary>
+        /// <returns>Model class instance with populated data</returns>
+        public {{#parent}}{{^isArray}}{{^isMap}}new {{/isMap}}{{/isArray}}{{/parent}}{{classname}} ToModel()
+        {
+            {{#parent}}
+            var toReturn = ({{classname}})base.ToModel();
+            {{/parent}}
+            {{^parent}}
+            var toReturn = new {{classname}}();
+            {{/parent}}
+            {{#vars}}
+            toReturn.{{name}} = {{name}};
+            {{/vars}}
+            return toReturn;
+        }
+        /// <summary>
+        /// Returns the {{classname}}{{modelPackage}} intance from dictionary representation. If the dictionary does not have the value, it is ignored
+        /// </summary>
+        /// <returns>{{classname}}{{modelPackage}} intance from dictionary representation</returns>
+        public static {{classname}} FromModel({{classname}} model)
+        {
+            ThrowIf.Argument.IsNull(model, nameof(model));
+            {{#parent}}
+            var toReturn = ({{classname}}){{{.}}}{{modelPackage}}.FromModel(model);
+            {{/parent}}
+            {{^parent}}
+            var toReturn = new {{classname}}();
+            {{/parent}}
+            {{#vars}}
+            toReturn.{{name}} = model.{{name}};
+            {{/vars}}
+            return toReturn;
+        }
     }
