@@ -193,15 +193,15 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         /// Returns the {{classname}} intance from json string
         /// </summary>
         /// <returns>{{classname}} intance from json string</returns>
-        public static {{classname}} FromJson(RGN.Dependencies.Serialization.IJson json, string jsonStr)
+        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}} FromJson(RGN.Dependencies.Serialization.IJson json, string jsonStr)
         {
             return json.FromJson<{{classname}}>(jsonStr);
         }
 
         /// <summary>
-        /// Returns Dictionary presentation of the object
+        /// Creates and adds not null values to Dictionary of the object
         /// </summary>
-        /// <returns>JSON string presentation of the object</returns>
+        /// <returns>Dictionary with keys as the field names and values of the fields</returns>
         public {{#parent}}{{^isArray}}{{^isMap}}override {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}virtual {{/parent}}Dictionary<string, object> ToDictionary()
         {
             {{#parent}}
@@ -217,13 +217,18 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             return dict;
         }
         /// <summary>
-        /// Returns the {{classname}} intance from dictionary representation
+        /// Returns the {{classname}} intance from dictionary representation. If the dictionary does not have the value, it is ignored
         /// </summary>
         /// <returns>{{classname}} intance from dictionary representation</returns>
-        public static {{classname}} FromDictionary(Dictionary<string, object> dictionary)
+        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}} FromDictionary(Dictionary<string, object> dictionary)
         {
             ThrowIf.Collection.IsNullOrEmpty(dictionary, nameof(dictionary));
+            {{#parent}}
+            var toReturn = ({{classname}}){{{.}}}.FromDictionary(dictionary);
+            {{/parent}}
+            {{^parent}}
             var toReturn = new {{classname}}();
+            {{/parent}}
             {{#vars}}
             if (dictionary.TryGetValue("{{name}}", out object {{name}}))
                 toReturn.{{name}} = ({{{dataType}}}){{name}};
