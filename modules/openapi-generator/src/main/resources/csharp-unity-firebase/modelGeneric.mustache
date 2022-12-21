@@ -220,14 +220,12 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         /// Returns the {{classname}}{{modelPackage}} intance from dictionary representation. If the dictionary does not have the value, it is ignored
         /// </summary>
         /// <returns>{{classname}}{{modelPackage}} intance from dictionary representation</returns>
-        public {{#parent}}{{^isArray}}{{^isMap}}new static {{/isMap}}{{/isArray}}{{/parent}}{{^parent}}static {{/parent}}{{classname}}{{modelPackage}} FromDictionary(Dictionary<string, object> dictionary)
+        public static {{classname}}{{modelPackage}} FromDictionary(Dictionary<string, object> dictionary, {{classname}}{{modelPackage}} existingInstance = null)
         {
             ThrowIf.Collection.IsNullOrEmpty(dictionary, nameof(dictionary));
+            var toReturn = existingInstance ?? new {{classname}}{{modelPackage}}();
             {{#parent}}
-            var toReturn = ({{classname}}{{modelPackage}}){{{.}}}{{modelPackage}}.FromDictionary(dictionary);
-            {{/parent}}
-            {{^parent}}
-            var toReturn = new {{classname}}{{modelPackage}}();
+            {{{.}}}{{modelPackage}}.FromDictionary(dictionary, toReturn);
             {{/parent}}
             {{#vars}}
             if (dictionary.TryGetValue("{{name}}", out object {{name}}))
@@ -240,13 +238,11 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         /// Creates a model instance from this DTO
         /// </summary>
         /// <returns>Model class instance with populated data</returns>
-        public {{#parent}}{{^isArray}}{{^isMap}}new {{/isMap}}{{/isArray}}{{/parent}}{{classname}} ToModel()
+        public {{classname}} ToModel({{classname}} existingInstance = null)
         {
+            var toReturn = existingInstance ?? new {{classname}}();
             {{#parent}}
-            var toReturn = ({{classname}})base.ToModel();
-            {{/parent}}
-            {{^parent}}
-            var toReturn = new {{classname}}();
+            base.ToModel(toReturn);
             {{/parent}}
             {{#vars}}
             toReturn.{{name}} = {{name}};
@@ -257,14 +253,12 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
         /// Returns the {{classname}}{{modelPackage}} intance from dictionary representation. If the dictionary does not have the value, it is ignored
         /// </summary>
         /// <returns>{{classname}}{{modelPackage}} intance from dictionary representation</returns>
-        public static {{classname}} FromModel({{classname}} model)
+        public static {{classname}}{{modelPackage}} FromModel({{classname}} model, {{classname}}{{modelPackage}} existingInstance = null)
         {
             ThrowIf.Argument.IsNull(model, nameof(model));
+            var toReturn = existingInstance ?? new {{classname}}{{modelPackage}}();
             {{#parent}}
-            var toReturn = ({{classname}}){{{.}}}{{modelPackage}}.FromModel(model);
-            {{/parent}}
-            {{^parent}}
-            var toReturn = new {{classname}}();
+            {{{.}}}{{modelPackage}}.FromModel(model, toReturn);
             {{/parent}}
             {{#vars}}
             toReturn.{{name}} = model.{{name}};
