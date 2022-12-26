@@ -30,6 +30,23 @@
         public {{{complexType}}}{{^complexType}}{{{datatypeWithEnum}}}{{/complexType}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}} {{name}};
         {{/isEnum}}
         {{/vars}}
+
+        {{#vars}}
+        {{^isInherited}}
+        {{^isEnum}}
+        {{#description}}
+        /// <summary>
+        /// {{.}}
+        /// </summary>
+        {{/description}}
+        {{#deprecated}}
+        [Obsolete]
+        {{/deprecated}}
+        public {{{dataType}}} {{name}};
+        {{/isEnum}}
+        {{/isInherited}}
+        {{/vars}}
+
         // To support static factory
         private {{classname}}{{modelPackage}}() { }
     {{#hasRequired}}
@@ -90,22 +107,6 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             {{/isInherited}}
             {{/vars}}
         }
-
-        {{#vars}}
-        {{^isInherited}}
-        {{^isEnum}}
-        {{#description}}
-        /// <summary>
-        /// {{.}}
-        /// </summary>
-        {{/description}}
-        {{#deprecated}}
-        [Obsolete]
-        {{/deprecated}}
-        public {{{dataType}}} {{name}};
-        {{/isEnum}}
-        {{/isInherited}}
-        {{/vars}}
 
         /// <summary>
         /// Returns the string presentation of the object
