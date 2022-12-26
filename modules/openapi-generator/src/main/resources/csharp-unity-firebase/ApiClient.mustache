@@ -50,7 +50,7 @@ namespace RGN.Modules.{{packageName}}.FunctionsClient
         /// <remarks>
         /// {{{notes}}}
         /// </remarks>
-        /// <exception cref="{{packageName}}.Client.ApiException">Thrown when fails to make API call</exception>
+        /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         {{#allParams}}/// <param name="{{paramName}}">{{description}}{{^required}} (optional{{#defaultValue}}, default to {{.}}{{/defaultValue}}){{/required}}{{#isDeprecated}} (deprecated){{/isDeprecated}}</param>
         {{/allParams}}/// <param name="cancellationToken">Cancellation Token to cancel request (optional) </param>
         /// <returns>Task of {{{returnType}}}{{^returnType}}void{{/returnType}}</returns>
@@ -65,11 +65,22 @@ namespace RGN.Modules.{{packageName}}.FunctionsClient
             };
             try
             {
-                var result = await m{{operationId}}Function.CallAsync(parameters);
+                var functionResult = await m{{operationId}}Function.CallAsync(parameters);
                 cancellationToken.ThrowIfCancellationRequested();
-                var dictResult = (IDictionary<object, object>)result.Data;
+                var dictResult = (Dictionary<string, object>)functionResult.Data;
+                {{#returnType}}
+                {{#returnTypeIsPrimitive}}
+                var result = ({{returnType}})dictResult["result"];
+                {{/returnTypeIsPrimitive}}
+                {{^returnTypeIsPrimitive}}
+                var result = {{returnType}}{{modelPackage}}.FromDictionary(dictResult);
+                {{/returnTypeIsPrimitive}}
+                return result;
+                {{/returnType}}
+                {{^returnType}}
                 var strResult = (string)dictResult["result"];
-                return {{#returnType}}{{returnType}}{{modelPackage}}.FromJson(mRgnCore.Dependencies.Json, strResult){{/returnType}}{{^returnType}}strResult{{/returnType}};
+                return strResult;
+                {{/returnType}}
             }
             catch (Exception e)
             {
