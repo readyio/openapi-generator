@@ -57,10 +57,10 @@ namespace RGN.Modules.{{packageName}}.FunctionsClient
         {{#isDeprecated}}
         [Obsolete]
         {{/isDeprecated}}
-        public async {{#returnType}}Task<{{{.}}}{{modelPackage}}>{{/returnType}}{{^returnType}}Task<string>{{/returnType}} {{operationId}}Async({{#allParams}}{{dataType}}{{modelPackage}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{dataType}}{{modelPackage}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
+        public async {{#returnType}}Task<{{{.}}}{{modelPackage}}>{{/returnType}}{{^returnType}}Task<string>{{/returnType}} {{operationId}}Async({{#allParams}}{{dataType}}{{#isModel}}{{modelPackage}}{{/isModel}} {{paramName}}{{^required}}{{#optionalMethodArgument}} = default({{dataType}}{{modelPackage}}){{/optionalMethodArgument}}{{/required}}{{^-last}}, {{/-last}}{{/allParams}}{{#allParams.0}}, {{/allParams.0}}CancellationToken cancellationToken = default(CancellationToken))
         {
             var parameters = new Dictionary<string, object>() {
-                {{#allParams}}{ "{{paramName}}", {{paramName}} }{{^-last}},
+                {{#allParams}}{ "{{paramName}}", {{paramName}}{{#isModel}}.ToDictionary(){{/isModel}} }{{^-last}},
                 {{/-last}}{{/allParams}}
             };
             try
