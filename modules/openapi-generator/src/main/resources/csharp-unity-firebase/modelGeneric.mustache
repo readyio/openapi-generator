@@ -117,12 +117,9 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             if (input == null)
                 return false;
 
-            return {{#vars}}{{#parent}}base.Equals(input) && {{/parent}}{{^isContainer}}
-                (
-                    {{name}} == input.{{name}} ||
-                    ({{name}} != null &&
-                    {{name}}.Equals(input.{{name}}))
-                ){{^-last}} && {{/-last}}{{/isContainer}}{{#isContainer}}
+            return {{#parent}}base.Equals(input) &&
+            {{/parent}}{{#vars}}{{^isContainer}}({{name}} == input.{{name}} || ({{^isPrimitiveType}}{{^isEnum}}{{name}} != null && {{/isEnum}}{{/isPrimitiveType}}{{#isString}}{{name}} != null && {{/isString}}{{name}}.Equals(input.{{name}}))){{^-last}} &&
+            {{/-last}}{{/isContainer}}{{#isContainer}}
                 (
                     {{name}} == input.{{name}} ||
                     {{name}} != null &&
@@ -146,8 +143,7 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
                 int hashCode = 41;
                 {{/parent}}
                 {{#vars}}
-                if ({{name}} != null)
-                    hashCode = hashCode * 59 + {{name}}.GetHashCode();
+                {{^isPrimitiveType}}{{^isEnum}}if ({{name}} != null) {{/isEnum}}{{/isPrimitiveType}}{{#isString}}if ({{name}} != null) {{/isString}}hashCode = hashCode * 59 + {{name}}.GetHashCode();
                 {{/vars}}
                 return hashCode;
             }
@@ -183,8 +179,7 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             var dict = new Dictionary<string, object>();
             {{/parent}}
             {{#vars}}
-            if ({{name}} != null)
-                dict.Add("{{name}}", {{name}}{{^isPrimitiveType}}.ToDictionary(){{/isPrimitiveType}});
+            {{^isPrimitiveType}}{{^isEnum}}if ({{name}} != null) {{/isEnum}}{{/isPrimitiveType}}{{#isString}}if ({{name}} != null) {{/isString}}dict.Add("{{name}}", {{name}}{{^isPrimitiveType}}.ToDictionary(){{/isPrimitiveType}});
             {{/vars}}
             return dict;
         }
