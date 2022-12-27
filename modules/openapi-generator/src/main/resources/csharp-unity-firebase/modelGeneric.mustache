@@ -2,38 +2,10 @@
     /// {{description}}{{^description}}{{classname}}{{/description}}
     /// </summary>
     [Serializable]
-    {{>visibility}} class {{classname}}{{modelPackage}} : {{#parent}}{{{.}}}{{modelPackage}}, {{/parent}} IEquatable<{{classname}}{{modelPackage}}>
+    {{>visibility}} class {{classname}}{{modelPackage}} : {{#parent}}{{{.}}}{{modelPackage}}, {{/parent}}IEquatable<{{classname}}{{modelPackage}}>
     {
         {{#vars}}
-        {{#items.isEnum}}
-        {{#items}}
-        {{^complexType}}
-{{>modelInnerEnum}}
-        {{/complexType}}
-        {{/items}}
-        {{/items.isEnum}}
-        {{#isEnum}}
-        {{^complexType}}
-{{>modelInnerEnum}}
-        {{/complexType}}
-        {{/isEnum}}
-        {{#isEnum}}
-        /// <summary>
-        /// {{description}}{{^description}}Gets or Sets {{{name}}}{{/description}}
-        /// </summary>
-        {{#description}}
-        /// <value>{{.}}</value>
-        {{/description}}
-        {{#deprecated}}
-        [Obsolete]
-        {{/deprecated}}
-        public {{{complexType}}}{{^complexType}}{{{datatypeWithEnum}}}{{/complexType}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}} {{name}};
-        {{/isEnum}}
-        {{/vars}}
-
-        {{#vars}}
         {{^isInherited}}
-        {{^isEnum}}
         {{#description}}
         /// <summary>
         /// {{.}}
@@ -42,8 +14,7 @@
         {{#deprecated}}
         [Obsolete]
         {{/deprecated}}
-        public {{{dataType}}} {{name}};
-        {{/isEnum}}
+        public {{{dataType}}}{{^isPrimitiveType}}{{modelPackage}}{{/isPrimitiveType}}{{#isEnum}}{{modelPackage}}{{/isEnum}} {{name}};
         {{/isInherited}}
         {{/vars}}
 
@@ -66,7 +37,7 @@
         {{/isReadOnly}}
         {{/vars}}
         public {{classname}}{{modelPackage}}(
-            {{#readWriteVars}}{{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}} {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}} = {{{defaultValue}}}{{^defaultValue}}default({{{datatypeWithEnum}}}{{#isEnum}}{{^isContainer}}{{^required}}?{{/required}}{{/isContainer}}{{/isEnum}}){{/defaultValue}}{{^-last}},
+            {{#readWriteVars}}{{{datatypeWithEnum}}}{{^isContainer}}{{/isContainer}}{{^isPrimitiveType}}{{modelPackage}}{{/isPrimitiveType}}{{#isEnum}}{{modelPackage}}{{/isEnum}} {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}} = {{{defaultValue}}}{{^defaultValue}}default({{{datatypeWithEnum}}}{{^isPrimitiveType}}{{modelPackage}}{{/isPrimitiveType}}{{#isEnum}}{{modelPackage}}{{/isEnum}}){{/defaultValue}}{{^-last}},
             {{/-last}}{{/readWriteVars}}){{#parent}}
             : base({{#parentVars}}{{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}}{{^-last}}, {{/-last}}{{/parentVars}}){{/parent}}
         {
@@ -213,7 +184,7 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             {{/parent}}
             {{#vars}}
             if ({{name}} != null)
-                dict.Add("{{name}}", {{name}});
+                dict.Add("{{name}}", {{name}}{{^isPrimitiveType}}.ToDictionary(){{/isPrimitiveType}});
             {{/vars}}
             return dict;
         }
@@ -230,7 +201,15 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             {{/parent}}
             {{#vars}}
             if (dictionary.TryGetValue("{{name}}", out object {{name}}))
-                toReturn.{{name}} = ({{{dataType}}}){{name}};
+            {
+                {{^isPrimitiveType}}
+                var nested = (Dictionary<string, object>){{name}};
+                toReturn.{{name}} = {{dataType}}{{modelPackage}}.FromDictionary(nested);
+                {{/isPrimitiveType}}
+                {{#isPrimitiveType}}
+                toReturn.{{name}} = ({{dataType}}{{#isEnum}}{{modelPackage}}{{/isEnum}}){{name}};
+                {{/isPrimitiveType}}
+            }
             {{/vars}}
             return toReturn;
         }
@@ -246,7 +225,12 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             base.ToModel(toReturn);
             {{/parent}}
             {{#vars}}
-            toReturn.{{name}} = {{name}};
+            {{#isEnum}}
+            toReturn.{{name}} = ({{dataType}})(int){{name}};
+            {{/isEnum}}
+            {{^isEnum}}
+            toReturn.{{name}} = {{name}}{{^isPrimitiveType}}.ToModel(){{/isPrimitiveType}};
+            {{/isEnum}}
             {{/vars}}
             return toReturn;
         }
@@ -262,7 +246,17 @@ this.{{name}} = {{#lambda.camelcase_param}}{{name}}{{/lambda.camelcase_param}};
             {{{.}}}{{modelPackage}}.FromModel(model, toReturn);
             {{/parent}}
             {{#vars}}
+            {{#isPrimitiveType}}
+            {{#isEnum}}
+            toReturn.{{name}} = ({{dataType}}{{modelPackage}})(int)model.{{name}};
+            {{/isEnum}}
+            {{^isEnum}}
             toReturn.{{name}} = model.{{name}};
+            {{/isEnum}}
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+            toReturn.{{name}} = {{dataType}}{{modelPackage}}.FromModel(model.{{name}});
+            {{/isPrimitiveType}}
             {{/vars}}
             return toReturn;
         }

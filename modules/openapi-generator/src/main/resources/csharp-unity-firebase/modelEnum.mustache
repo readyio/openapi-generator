@@ -6,7 +6,7 @@
     {{/description}}
     {{#allowableValues}}{{#enumVars}}{{#-first}}{{#isString}}{{^useGenericHost}}
     {{/useGenericHost}}{{/isString}}{{/-first}}{{/enumVars}}{{/allowableValues}}
-    {{>visibility}} enum {{datatypeWithEnum}}{{^datatypeWithEnum}}{{classname}}{{/datatypeWithEnum}}{{#vendorExtensions.x-enum-byte}}: byte{{/vendorExtensions.x-enum-byte}}
+    {{>visibility}} enum {{datatypeWithEnum}}{{^datatypeWithEnum}}{{classname}}{{/datatypeWithEnum}}{{modelPackage}}{{#vendorExtensions.x-enum-byte}}: byte{{/vendorExtensions.x-enum-byte}}
     {
         {{#allowableValues}}
         {{#enumVars}}
